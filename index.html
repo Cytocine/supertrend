@@ -11,10 +11,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TrendCloud">
-<link rel="apple-touch-icon" id="appleTouchIcon">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 
-<!-- Embedded PWA Manifest -->
-<link rel="manifest" id="pwaManifest">
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -418,49 +420,13 @@
 "use strict";
 
 /* ============================================================
-   PWA MANIFEST & APP ICON INITIALIZER
+   PWA SERVICE WORKER REGISTRATION
+   (manifest + icons are now static files: manifest.json, icons/)
 ============================================================ */
-const SVG_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="100" fill="#0a0e14"/>
-  <path d="M96 352 L192 240 L288 304 L416 160" fill="none" stroke="#00e676" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
-  <polygon points="416,160 380,165 411,196" fill="#00e676"/>
-  <circle cx="288" cy="304" r="16" fill="#38bdf8"/>
-  <circle cx="192" cy="240" r="16" fill="#ff334b"/>
-</svg>`;
-const ICON_DATA_URL = 'data:image/svg+xml;base64,' + btoa(SVG_ICON);
-document.getElementById('appleTouchIcon').href = ICON_DATA_URL;
-
-const manifest = {
-  name: "Trend Cloud Supertrend Scanner",
-  short_name: "TrendCloud",
-  start_url: ".",
-  display: "standalone",
-  background_color: "#0a0e14",
-  theme_color: "#0a0e14",
-  orientation: "any",
-  icons: [
-    { src: ICON_DATA_URL, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
-  ]
-};
-const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-document.getElementById('pwaManifest').href = URL.createObjectURL(manifestBlob);
-
 if ('serviceWorker' in navigator) {
-  const swCode = `
-    const CACHE_NAME = 'tc-scanner-v3';
-    self.addEventListener('install', (e) => { self.skipWaiting(); });
-    self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
-    self.addEventListener('fetch', (e) => {
-      if (e.request.method !== 'GET' || !e.request.url.startsWith('http')) return;
-      e.respondWith(
-        fetch(e.request).catch(() => caches.match(e.request))
-      );
-    });
-  `;
-  try {
-    const swBlob = new Blob([swCode], { type: 'application/javascript' });
-    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
-  } catch(e){}
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
 }
 
 let deferredPrompt = null;
