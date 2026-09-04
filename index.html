@@ -208,7 +208,7 @@
     .col-scanner.show{display:flex;}
     .col-chart{display:none;}
     .col-chart.show{display:flex;}
-    .app{padding-bottom:calc(56px + var(--safe-b));}
+    .app{padding-bottom:calc(60px + var(--safe-b));}
     .tabbar{
       display:flex; position:fixed; bottom:0; left:0; right:0; z-index:40;
       background:#0d131a; border-top:1px solid var(--line); padding:8px 10px calc(8px + var(--safe-b));
@@ -216,11 +216,57 @@
     }
     .tabbar button{
       flex:1; background:var(--panel2); border:1px solid var(--line); color:var(--muted);
-      padding:9px; border-radius:9px; font-weight:700; font-size:12.5px;
+      padding:12px; border-radius:9px; font-weight:700; font-size:13.5px; min-height:46px;
     }
     .tabbar button.active{color:#051724; background:var(--accent); border-color:var(--accent);}
-    .chart-title{font-size:16px;}
-    .back-btn{display:flex; flex-shrink:0;}
+
+    /* --- Bigger, easier-to-hit touch targets everywhere --- */
+    .iconbtn{width:40px; height:40px; font-size:16px;}
+    .btn{padding:11px 14px; font-size:13.5px;}
+    .chip{font-size:12px; padding:7px 12px; min-height:32px; display:inline-flex; align-items:center;}
+
+    /* --- Scanner table: fewer columns, bigger rows, easier taps --- */
+    .scan-controls{padding:10px 10px;}
+    .filter-chips{gap:7px;}
+    .thead{
+      grid-template-columns: 1.5fr .8fr .9fr .9fr;
+      padding:9px 10px; font-size:10.5px;
+    }
+    .thead span:nth-child(2){display:none;} /* hide 1H column header on mobile */
+    .row{
+      grid-template-columns: 1.5fr .8fr .9fr .9fr;
+      padding:14px 10px; min-height:56px;
+    }
+    .row > *:nth-child(2){display:none;} /* hide 1H badge on mobile, keep 4H + score + fresh */
+    .sym{font-size:15px;}
+    .sym .px{font-size:12px;}
+    .badge{font-size:11.5px; padding:5px 8px; min-width:48px;}
+    .score{font-size:16px;}
+    .fresh-badge{font-size:11px;}
+
+    /* --- Chart panel: reclaim vertical space, declutter header --- */
+    .chart-header{padding:8px 10px; gap:6px;}
+    .chart-title{font-size:17px;}
+    .chart-price{font-size:14px;}
+    .chart-stats-strip{width:100%; order:3; margin-left:0; gap:5px;}
+    .stat-pill{font-size:12px; padding:5px 9px; flex:1; justify-content:center;}
+    .chart-tools{margin-left:0; width:100%; order:4; justify-content:space-between;}
+    .tf-toggle{flex:1;}
+    .tf-toggle button{flex:1; padding:9px 0; font-size:13px;}
+    #playBtn, #exportChartBtn{width:40px; height:40px; flex-shrink:0;}
+
+    /* Drawing toolbar: move to a full-width bottom strip so it never
+       covers price action, and give each tool a bigger tap target */
+    .draw-toolbar{
+      top:auto; bottom:0; left:0; right:0; z-index:16;
+      flex-direction:row; justify-content:center; border-radius:0;
+      border-left:none; border-right:none; border-bottom:none;
+      padding:6px calc(6px + var(--safe-b)); gap:8px;
+    }
+    .draw-toolbar .draw-btn{width:42px; height:42px; font-size:16px;}
+
+    .chart-body{padding-bottom:54px;} /* keep chart area clear of the draw toolbar */
+    .chart-empty{font-size:14px;}
   }
 
   /* ===== Modal ===== */
