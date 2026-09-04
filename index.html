@@ -225,24 +225,19 @@
     .btn{padding:11px 14px; font-size:13.5px;}
     .chip{font-size:12px; padding:7px 12px; min-height:32px; display:inline-flex; align-items:center;}
 
-    /* --- Scanner table: fewer columns, bigger rows, easier taps --- */
-    .scan-controls{padding:10px 10px;}
+    /* --- Scanner panel: minimal, name-only list. Detail lives in the chart. --- */
+    .col-scanner{max-height:38vh;}
+    .scan-controls{padding:8px 10px;}
     .filter-chips{gap:7px;}
-    .thead{
-      grid-template-columns: 1.5fr .8fr .9fr .9fr;
-      padding:9px 10px; font-size:10.5px;
-    }
-    .thead span:nth-child(2){display:none;} /* hide 1H column header on mobile */
+    .thead{display:none;} /* no column header needed for a name-only list */
     .row{
-      grid-template-columns: 1.5fr .8fr .9fr .9fr;
-      padding:14px 10px; min-height:56px;
+      display:flex; align-items:center; justify-content:space-between;
+      grid-template-columns:none;
+      padding:12px 10px; min-height:48px;
     }
-    .row > *:nth-child(2){display:none;} /* hide 1H badge on mobile, keep 4H + score + fresh */
-    .sym{font-size:15px;}
-    .sym .px{font-size:12px;}
-    .badge{font-size:11.5px; padding:5px 8px; min-width:48px;}
-    .score{font-size:16px;}
-    .fresh-badge{font-size:11px;}
+    .row > *:not(.sym){display:none;} /* just the symbol — open the chart for everything else */
+    .sym{font-size:15px; display:flex; align-items:baseline; gap:8px;}
+    .sym .px{font-size:12px; margin-top:0;}
 
     /* --- Chart panel: reclaim vertical space, declutter header --- */
     .chart-header{padding:8px 10px; gap:6px;}
