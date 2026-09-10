@@ -1,8 +1,8 @@
-// TrendCloud Scanner — Service Worker
-// Bump CACHE_NAME on every deploy that changes app files so old caches are dropped.
-const CACHE_NAME = 'tc-scanner-v1';
-
-const APP_SHELL = [
+// Trend Watch service worker
+// Caches the app shell (HTML/manifest/icons/chart library) for fast, offline-tolerant
+// loading, but NEVER caches Alpaca API responses — market data must always be live.
+const CACHE_VERSION = "trend-watch-v2";
+const SHELL_ASSETS = [
   './',
   "./index.html",
   "./manifest.json",
@@ -13,54 +13,62 @@ const APP_SHELL = [
   "https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"
 ];
 
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
+// Hosts that must always hit the network. Alpaca's data and trading APIs
+// are excluded from caching on purpose — stale prices/signals are worse than none.
+const NEVER_CACHE_HOSTS = [
+  "data.alpaca.markets",
+  "paper-api.alpaca.markets",
+  "api.alpaca.markets"
+];
+
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).catch(() => {})
+    caches.open(CACHE_VERSION).then((cache) =>
+      cache.addAll(SHELL_ASSETS).catch(() => {
+        // Don't fail install if e.g. the CDN script is briefly unreachable;
+        // shell assets will just be fetched from network on first use.
+      })
+    )
   );
+  self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    ).then(() => self.clients.claim())
+      Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))
+    )
   );
+  self.clients.claim();
 });
 
-// Network-first for navigation/app files (so you always get the latest deploy when online),
-// falling back to cache when offline. Cache-first for third-party static assets (fonts, chart lib)
-// to keep the app fast and usable offline once loaded.
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   const req = event.request;
-  if (req.method !== 'GET' || !req.url.startsWith('http')) return;
+  if (req.method !== "GET") return;
 
-  const url = new URL(req.url);
-  const isSameOrigin = url.origin === self.location.origin;
+  let url;
+  try { url = new URL(req.url); } catch (e) { return; }
 
-  // Never cache/interfere with the live market data API calls.
-  if (url.hostname.includes('alpaca.markets')) return;
+  if (NEVER_CACHE_HOSTS.includes(url.hostname)) {
+    // Always go to network for market/account data; don't touch the cache at all.
+    event.respondWith(fetch(req));
+    return;
+  }
 
-  if (isSameOrigin) {
-    event.respondWith(
-      fetch(req)
+  // App shell: cache-first, falling back to network, and quietly refreshing
+  // the cache in the background so the next offline load has the latest shell.
+  event.respondWith(
+    caches.match(req).then((cached) => {
+      const networkFetch = fetch(req)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(CACHE_VERSION).then((cache) => cache.put(req, copy));
+          }
           return res;
         })
-        .catch(() => caches.match(req).then((cached) => cached || caches.match('./index.html')))
-    );
-  } else {
-    event.respondWith(
-      caches.match(req).then((cached) => {
-        if (cached) return cached;
-        return fetch(req).then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
-          return res;
-        }).catch(() => cached);
-      })
-    );
-  }
+        .catch(() => cached);
+      return cached || networkFetch;
+    })
+  );
 });
