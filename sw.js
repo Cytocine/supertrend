@@ -4,10 +4,13 @@ const CACHE_NAME = 'tc-scanner-v1';
 
 const APP_SHELL = [
   './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  "./index.html",
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./icon-512-maskable.png",
+  "./apple-touch-icon.png",
+  "https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"
 ];
 
 self.addEventListener('install', (event) => {
